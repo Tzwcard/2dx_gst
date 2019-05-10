@@ -1,0 +1,93 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+    <Filter Include="snd_decode">
+      <UniqueIdentifier>{2eeb0381-3431-424a-af25-1b36fa1f4f7b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="misc">
+      <UniqueIdentifier>{a6f24f28-2123-486a-9fa0-0c516aa3d48a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="main_old.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="iidxchart.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="2dxhelper.cpp">
+      <Filter>snd_decode</Filter>
+    </ClCompile>
+    <ClCompile Include="msadpcm.cpp">
+      <Filter>snd_decode</Filter>
+    </ClCompile>
+    <ClCompile Include="s3phelper.cpp">
+      <Filter>snd_decode</Filter>
+    </ClCompile>
+    <ClCompile Include="wma_helper.cpp">
+      <Filter>snd_decode</Filter>
+    </ClCompile>
+    <ClCompile Include="misc.cpp">
+      <Filter>misc</Filter>
+    </ClCompile>
+    <ClCompile Include="sha1.cpp">
+      <Filter>misc</Filter>
+    </ClCompile>
+    <ClCompile Include="waveoutput.cpp">
+      <Filter>misc</Filter>
+    </ClCompile>
+    <ClCompile Include="soundhelper.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="defs.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="outdef.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="iidxchart.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="wma_helper.h">
+      <Filter>snd_decode</Filter>
+    </ClInclude>
+    <ClInclude Include="s3phelper.h">
+      <Filter>snd_decode</Filter>
+    </ClInclude>
+    <ClInclude Include="msadpcm.h">
+      <Filter>snd_decode</Filter>
+    </ClInclude>
+    <ClInclude Include="2dxhelper.h">
+      <Filter>snd_decode</Filter>
+    </ClInclude>
+    <ClInclude Include="sha1.h">
+      <Filter>misc</Filter>
+    </ClInclude>
+    <ClInclude Include="waveoutput.h">
+      <Filter>misc</Filter>
+    </ClInclude>
+    <ClInclude Include="misc.h">
+      <Filter>misc</Filter>
+    </ClInclude>
+    <ClInclude Include="soundhelper.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

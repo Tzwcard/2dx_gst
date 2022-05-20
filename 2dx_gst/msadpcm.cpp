@@ -24,13 +24,17 @@ struct T_fmt_coeff
 };
 
 #ifdef _USE_MSACM32
-static DWORD decode_msadpcm(const uint8_t* wavedata, std::size_t totalsize, uint8_t *in, size_t size_in, int16_t* outSamples)
+static DWORD decode_msadpcm(const uint8_t* wavedata, std::size_t totalsize, uint8_t* in, size_t size_in, uint8_t* channels, int16_t* outSamples)
 {
 	/* REF: http://d.hatena.ne.jp/radioactive_radiance/20101027/1288134918 */
 	DWORD ret = 0;
 	size_t data_size = 0;
 
 	ADPCMWAVEFORMAT *fmt = (ADPCMWAVEFORMAT *)wavedata;
+
+	auto dump_fmt = [](WAVEFORMATEX* in) {
+		printf("Format: 0x%08x, %d, %d, %d\n", in->wFormatTag, in->nChannels, in->nSamplesPerSec, in->wBitsPerSample);
+	};
 
 	PCMWAVEFORMAT decode_fmt;
 
@@ -41,12 +45,17 @@ static DWORD decode_msadpcm(const uint8_t* wavedata, std::size_t totalsize, uint
 	decode_fmt.wf.nBlockAlign = decode_fmt.wf.nChannels * sizeof(__OUTPUT_WAVEFORM_TYPE);
 	decode_fmt.wBitsPerSample = sizeof(__OUTPUT_WAVEFORM_TYPE)* 8;
 
+	// dump_fmt(&fmt->wfx);
+
 	HRESULT hr;
 
 	HACMSTREAM hACM;
 	ACMSTREAMHEADER acmStreamHeader;
 
 	hr = acmFormatSuggest(0, (LPWAVEFORMATEX)wavedata, (LPWAVEFORMATEX)&decode_fmt, sizeof(ADPCMWAVEFORMAT), ACM_FORMATSUGGESTF_WFORMATTAG);
+
+	if (channels) *channels = (uint8_t) decode_fmt.wf.nChannels;
+
 	hr = acmStreamOpen(&hACM, 0, (LPWAVEFORMATEX)wavedata, (LPWAVEFORMATEX)&decode_fmt, NULL, NULL, NULL, ACM_STREAMOPENF_NONREALTIME);
 	hr = acmStreamSize(hACM, size_in, &ret, ACM_STREAMSIZEF_SOURCE);
 
@@ -231,7 +240,7 @@ static int decode_msadpcm(const uint8_t* blockData, std::size_t totalsize, ::siz
 static const char _data_string[] = "data", 
 _fmt_string[] = "fmt ",
 _fact_string[] = "fact";
-int msadpcm_to_waveform(unsigned char *adpcm_data, int size_adpcm_data, unsigned char *wave_data)
+int msadpcm_to_waveform(unsigned char *adpcm_data, int size_adpcm_data, unsigned char *wave_data, uint8_t* ch)
 {
 	int wave_size = 0, pos = 0, fmt_pos = 0;
 
@@ -294,6 +303,7 @@ int msadpcm_to_waveform(unsigned char *adpcm_data, int size_adpcm_data, unsigned
 		size_adpcm_data - fmt_pos,
 		adpcm_rawdata,
 		size,
+		ch,
 		(int16_t*)wave_data
 		);
 	wave_size = wave_size_fact ? wave_size_fact : wave_size;

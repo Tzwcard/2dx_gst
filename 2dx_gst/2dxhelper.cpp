@@ -64,7 +64,7 @@ int read_2dx(char *s3p_path, FARPROC iidxsnd_read_callback)
 		psnd9 = (snd9_header*)(filebuf + *p_index);
 
 		if (iidxsnd_read_callback)
-			((int(*)(int id, void *buf, int size))iidxsnd_read_callback)(cnt, (filebuf + *p_index + sizeof(snd9_header)), _byteswap_ulong(psnd9->size));
+			((int(*)(int id, void *buf, int size))iidxsnd_read_callback)(cnt, (filebuf + *p_index + sizeof(snd9_header)), psnd9->size);
 
 		//	tmp_ptr = (uint32_t*)(filebuf + p_index->pos_file + 0x10);
 		//	sprintf_s(logline, 260, "%08d: %08x\t%08x\t%08x\t%08x\t%08x\n",

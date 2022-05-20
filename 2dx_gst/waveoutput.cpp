@@ -13,7 +13,7 @@ static int32_t mixing_function(int32_t buf, int16_t input)
 }
 
 // mix input with buffer, treat buffer as 32bit signed samples for further operatings
-static int32_t add_wave_to_buffer(uint8_t *output_buffer, uint8_t *wave_buffer, int32_t size_input, int32_t size_buffer, int32_t mix_offset)
+static int32_t add_wave_to_buffer(uint8_t *output_buffer, uint8_t *wave_buffer, int32_t size_input, int32_t size_buffer, int32_t mix_offset, uint8_t ch)
 {
 	// treat as 44100Hz, 32bit, stereo, sample offset = (mix_offset * 441 / 10) * sizeof(int32_t) * 2
 	int32_t pos_mix = (mix_offset * 441 / 10) * sizeof(int32_t)* 2, pos = 0;
@@ -23,8 +23,8 @@ static int32_t add_wave_to_buffer(uint8_t *output_buffer, uint8_t *wave_buffer, 
 	{
 		// mix both channels
 		*sample_mix = mixing_function(*sample_mix, *sample_in);
-		*(sample_mix + 1) = mixing_function(*(sample_mix + 1), *(sample_in + 1));
-		sample_mix += 2; sample_in += 2;
+		*(sample_mix + 1) = mixing_function(*(sample_mix + 1), *(sample_in + (ch == 1 ? 0 : 1)));
+		sample_mix += 2; sample_in += (ch == 1 ? 1 : 2);
 		pos += 4;
 	}
 	return (pos_mix + size_input * 2 > size_buffer) ? pos_mix + size_input * 2 : size_buffer;
@@ -115,8 +115,9 @@ int32_t mix_bgm(uint8_t *output_buf, int32_t size_output_buf, char *keysound_pre
 
 	wave_info info;
 	query_sound_from_buffer(keysound_id - 1, &info);
+	uint8_t ch = query_channels_from_buffer(keysound_id - 1);
 
-	int32_t ret = add_wave_to_buffer(output_buf, (uint8_t*)info.addr, info.size, size_output_buf, time);
+	int32_t ret = add_wave_to_buffer(output_buf, (uint8_t*)info.addr, info.size, size_output_buf, time, ch);
 	return ret;
 }
 #endif

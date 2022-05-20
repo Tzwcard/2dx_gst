@@ -35,7 +35,8 @@ template <class T> void SafeRelease(T **ppT)
 
 static HRESULT ConfigureAudioStream(
     IMFSourceReader *pReader,   // Pointer to the source reader.
-    IMFMediaType **ppPCMAudio   // Receives the audio format.
+    IMFMediaType **ppPCMAudio,   // Receives the audio format.
+    uint8_t *ch
     )
 {
     IMFMediaType *pUncompressedAudioType = NULL;
@@ -69,6 +70,8 @@ static HRESULT ConfigureAudioStream(
 	pPartialType->SetUINT32(MF_MT_AUDIO_BITS_PER_SAMPLE, sizeof(__OUTPUT_WAVEFORM_TYPE)* 8);
 	pPartialType->SetUINT32(MF_MT_AUDIO_AVG_BYTES_PER_SECOND, __OUTPUT_WAVEFORM_SAMPLE_PER_SECOND * __OUTPUT_WAVEFORM_CHANNELS * sizeof(__OUTPUT_WAVEFORM_TYPE));
 	pPartialType->SetUINT32(MF_MT_AUDIO_BLOCK_ALIGNMENT, __OUTPUT_WAVEFORM_CHANNELS * sizeof(__OUTPUT_WAVEFORM_TYPE));
+
+    if (ch) *ch = __OUTPUT_WAVEFORM_CHANNELS;
 
     // Set this type on the source reader. The source reader will
     // load the necessary decoder.
@@ -222,7 +225,8 @@ static HRESULT WriteWaveData(
 static int WriteWave(
 	IMFSourceReader *pReader, 
 	unsigned char *wave_data,
-	DWORD *wave_size
+	DWORD *wave_size,
+    uint8_t *ch
 	)
 {
 	HRESULT hr = S_OK;
@@ -231,7 +235,7 @@ static int WriteWave(
 
     // Configure the source reader to get uncompressed PCM audio from the source file.
 
-    hr = ConfigureAudioStream(pReader, &pAudioType);
+    hr = ConfigureAudioStream(pReader, &pAudioType, ch);
 
     // Calculate the maximum amount of audio to decode, in bytes.
     if (SUCCEEDED(hr))
@@ -246,7 +250,7 @@ static int WriteWave(
     return hr;
 }
 
-int wma_to_waveform(unsigned char *wma_data, int size_wma_data, unsigned char *wave_data)
+int wma_to_waveform(unsigned char *wma_data, int size_wma_data, unsigned char *wave_data, uint8_t *ch)
 {
 //	printf("wma_to_waveform(%p, %d, %p) called.\n", wma_data, size_wma_data, wave_data);
 
@@ -285,7 +289,7 @@ int wma_to_waveform(unsigned char *wma_data, int size_wma_data, unsigned char *w
 		hr = MFCreateSourceReaderFromURL(tmp_file_path_filename, NULL, &pReader);
 		if (FAILED(hr))
 		{
-			printf("Error opening input file: %S\n", tmp_file_path_filename, hr);
+			printf("Error opening input file: %S, %d\n", tmp_file_path_filename, hr);
 		}
 
 		CloseHandle(file);
@@ -296,7 +300,7 @@ int wma_to_waveform(unsigned char *wma_data, int size_wma_data, unsigned char *w
     // Write the WAVE file.
     if (SUCCEEDED(hr))
     {
-        hr = WriteWave(pReader, wave_data, &wave_size);
+        hr = WriteWave(pReader, wave_data, &wave_size, ch);
     }
 
     if (FAILED(hr))

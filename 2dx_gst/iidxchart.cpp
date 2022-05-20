@@ -8,7 +8,7 @@
 
 #include "misc.h"
 
-#define SIZE_OUTPUT_BUF 150 * 1024 * 1024 // 100MB
+#define SIZE_OUTPUT_BUF 150 * 1024 * 1024 // 150MB
 
 struct iidx_chart_index
 {
@@ -35,7 +35,13 @@ enum E_IIDX_CHART_CMD
 	E_2P_PLAY = 1,
 	E_1P_CHANGE_KEY = 2,
 	E_2P_CHANGE_KEY = 3,
-	E_KEYPLAY = 7
+	E_BPM_CHANGE = 4,
+	E_BEAT_CHANGE = 5,
+	E_MUSIC_END = 6,
+	E_KEYPLAY = 7,
+	E_TIMING_CHANGE = 8,
+	E_MEASURE = 12,
+	E_NOTE_COUNT = 16,
 };
 
 enum E_IIDX_CHART_TYPE_ID
@@ -168,8 +174,8 @@ int process_chart_file(int music_id, char *sndstr, int volume_level)
 			total_keysound = 0;
 			while ((int)p_chart - (int)chartdata < p_header->chart_index[i].size_chart + p_header->chart_index[i].pos_chart)
 			{
-				if (p_chart->timecode == 0x7fffffff) break;
-				//				printf("%8d: %02X, %02X, %04X\n", p_chart->timecode, p_chart->command, p_chart->val1, p_chart->val2);
+				if (p_chart->timecode == 0x7fffffff || p_chart->command == E_MUSIC_END) break;
+				// printf("%8d: %02X, %02X, %04X\n", p_chart->timecode, p_chart->command, p_chart->val1, p_chart->val2);
 
 				/*
 					check BSS end point

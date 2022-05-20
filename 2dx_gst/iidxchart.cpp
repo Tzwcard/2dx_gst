@@ -8,7 +8,7 @@
 
 #include "misc.h"
 
-#define SIZE_OUTPUT_BUF 100 * 1024 * 1024 // 100MB
+#define SIZE_OUTPUT_BUF 150 * 1024 * 1024 // 100MB
 
 struct iidx_chart_index
 {
@@ -202,11 +202,14 @@ int process_chart_file(int music_id, char *sndstr, int volume_level)
 						output_buf,
 						size_output_buf,
 						keysound_prefix,
-						keysounds[p_chart->val1 + 8 * (p_chart->command & 1)],
+						keysounds[(p_chart->val1 % 100) + 8 * (p_chart->command & 1)],
 						p_chart->timecode
 						);
 					total_keysound++;
-					if (p_chart->val1 == 07 && p_chart->val2 != 0)
+					if (
+						// BSS (0x07) or MSS (107 or 0x6B)
+						(p_chart->val1 % 100) == 0x07
+						&& p_chart->val2 != 0)
 					{
 						// lane 0x07 CN is BSS
 						bss_end_pos[0 + (p_chart->command & 1)] = p_chart->val2 + p_chart->timecode;
@@ -222,7 +225,7 @@ int process_chart_file(int music_id, char *sndstr, int volume_level)
 						it might have error if the keysound changes not once while BSS
 						(but it shouldn't changed more than once i think)
 					*/
-					if (p_chart->val1 == 07
+					if ((p_chart->val1 % 100) == 0x07
 						&& bss_end_pos[0 + (p_chart->command & 1)] != -1
 						&& p_chart->timecode <= bss_end_pos[0 + (p_chart->command & 1)]
 						)

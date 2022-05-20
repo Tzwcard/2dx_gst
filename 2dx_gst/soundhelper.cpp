@@ -10,7 +10,7 @@
 
 #include "misc.h"
 
-#define MAX_WAV_BUF_SIZE 150 * 1024 * 1024 // 150MB of wave size
+#define MAX_WAV_BUF_SIZE 250 * 1024 * 1024 // 150MB of wave size
 #define MAX_WAV_COUNT 4096
 
 static uint32_t addr_wavs[MAX_WAV_COUNT] = { 0 };

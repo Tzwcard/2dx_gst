@@ -10,6 +10,9 @@
 #include <fstream>
 
 #include "outdef.h"
+#include "misc.h"
+
+#define __MODULE__ "wma"
 
 #pragma comment(lib, "Shlwapi.lib")
 
@@ -145,7 +148,7 @@ static HRESULT WriteWaveData(
 
         if (dwFlags & MF_SOURCE_READERF_CURRENTMEDIATYPECHANGED)
         {
-            printf("Type change - not supported by WAVE file format.\n");
+            _logw("%s: Type change - not supported by WAVE file format.", __func__);
             break;
         }
         if (dwFlags & MF_SOURCE_READERF_ENDOFSTREAM)
@@ -156,7 +159,7 @@ static HRESULT WriteWaveData(
 
         if (pSample == NULL)
         {
-            printf("No sample\n");
+            _logw("%s: No sample", __func__);
             continue;
         }
 
@@ -250,7 +253,7 @@ static int WriteWave(
     return hr;
 }
 
-int wma_to_waveform(unsigned char *wma_data, int size_wma_data, unsigned char *wave_data, uint8_t *ch)
+int wma_to_waveform(unsigned char *wma_data, int size_wma_data, unsigned char *wave_data, unsigned char*ch)
 {
 //	printf("wma_to_waveform(%p, %d, %p) called.\n", wma_data, size_wma_data, wave_data);
 
@@ -289,7 +292,7 @@ int wma_to_waveform(unsigned char *wma_data, int size_wma_data, unsigned char *w
 		hr = MFCreateSourceReaderFromURL(tmp_file_path_filename, NULL, &pReader);
 		if (FAILED(hr))
 		{
-			printf("Error opening input file: %S, %d\n", tmp_file_path_filename, hr);
+			_logw("%s: Error opening input file: %S, %d", __func__, tmp_file_path_filename, hr);
 		}
 
 		CloseHandle(file);
@@ -305,7 +308,7 @@ int wma_to_waveform(unsigned char *wma_data, int size_wma_data, unsigned char *w
 
     if (FAILED(hr))
     {
-        printf("Failed, hr = 0x%X\n", hr);
+        _logw("%s: Failed, hr = 0x%X", __func__, hr);
     }
 
     SafeRelease(&pReader);

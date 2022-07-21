@@ -2,6 +2,9 @@
 #include "soundhelper.h"
 #include <fstream>
 
+#include "misc.h"
+#define __MODULE__ "output"
+
 static int32_t mixing_function(int32_t buf, int16_t input)
 {
 #if 1
@@ -49,7 +52,7 @@ int32_t normalize_bgm(uint8_t *output_buf, int32_t size_output_buf, int volume_l
 	sample_mix = (int32_t*)output_buf;
 	double ratio = (32768 / (max_sample_val / 1.0));
 	if (ratio > 1.0) ratio = 1.0;
-	printf("\t\tmixing level %f\n", ratio);
+	_logm("%s: mixing level %f", __func__, ratio);
 	while ((int)sample_mix - (int)output_buf < size_output_buf)
 	{
 		*sample_mix = (int32_t)(*sample_mix * ratio);

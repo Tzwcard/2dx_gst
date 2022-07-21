@@ -42,5 +42,5 @@ int main(int argc, char *argv[])
 			pos++;
 		}
 	}
-	return process_chart_file(atoi(argv[1]), snd_string, 100);//atoi(argv[3]));
+	return proc_chart(atoi(argv[1]), snd_string, 100);//atoi(argv[3]));
 }

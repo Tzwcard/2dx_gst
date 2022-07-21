@@ -14,5 +14,5 @@
 #pragma comment(lib, "mfuuid.lib")
 
 int wma_helper_initialize(void);
-int wma_to_waveform(unsigned char *wma_data, int size_wma_data, unsigned char *wave_data);
+int wma_to_waveform(unsigned char* wma_data, int size_wma_data, unsigned char* wave_data, unsigned char* ch);
 void wma_helper_uninitialize(void);

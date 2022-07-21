@@ -10,6 +10,8 @@
 
 #include "misc.h"
 
+#define __MODULE__ "sound"
+
 #define MAX_WAV_BUF_SIZE 250 * 1024 * 1024 // 250MB of wave size
 #define MAX_WAV_COUNT 4096
 
@@ -46,7 +48,7 @@ int snd_buf_init(void)
 		buf_wavs = new unsigned char[MAX_WAV_BUF_SIZE];
 		if (!buf_wavs)
 		{
-			printf("Failed to allocate wave buffer, exiting...\n");
+			_logf("%s: Failed to allocate wave buffer, exiting...", __func__);
 			exit(-1);
 		}
 
@@ -139,44 +141,48 @@ int clear_sound_buffer(void)
 	return 1;
 }
 
+static int try_init_sound_buffer(int music_id, const char* suffix, E_READ_TYPE sndtype);
+
 int init_sound_buffer(int music_id, char *suffix)
 {
 	int ret = 0;
 
 	clear_sound_buffer();
 
-	char filename_path[260];
-
-	if (suffix && *suffix != '0')
-		sprintf_s(filename_path, "%05d%c.%s", music_id, *suffix, "s3p");
-	else
-		sprintf_s(filename_path, "%05d.%s", music_id, "s3p");
-
-	if (PathFileExistsA(filename_path))
-	{
-		printf("Opening file %s...\n", filename_path);
-		ret = read_s3p(filename_path, (FARPROC)wma_read_callback);
-	}
-	else
-	{
-		if (suffix && *suffix != '0')
-			sprintf_s(filename_path, "%05d%c.%s", music_id, *suffix, "2dx");
-		else
-			sprintf_s(filename_path, "%05d.%s", music_id, "2dx");
-
-		if (PathFileExistsA(filename_path))
-		{
-			printf("Opening file %s...\n", filename_path);
-			ret = read_2dx(filename_path, (FARPROC)msadpcm_read_callback);
-		}
+	ret = try_init_sound_buffer(music_id, suffix, ENUM_TYPE_WMA);
+	if (ret == -1) {
+		ret = try_init_sound_buffer(music_id, suffix, ENUM_TYPE_MSADPCM);
 	}
 
-	printf("Total sound %d, memory used %d / %d (%.2f%%)\n",
+	_logm("%s: Total sound %d, memory used %d / %d (%.2f%%)",
+		__func__,
 		total_wavs,
 		curr_pos,
 		MAX_WAV_BUF_SIZE,
 		(double)((curr_pos * 100.0) / (MAX_WAV_BUF_SIZE * 1.0))
 		);
+
+	return ret;
+}
+
+static int try_init_sound_buffer(int music_id, const char* suffix, E_READ_TYPE sndtype) {
+	char filename_path[260];
+	int ret = -1;
+	FARPROC callback = sndtype == ENUM_TYPE_WMA ? (FARPROC)wma_read_callback : (FARPROC)msadpcm_read_callback;
+	typedef int(*SNDREAD_CALL)(char*, FARPROC);
+	SNDREAD_CALL func = sndtype == ENUM_TYPE_WMA ? read_s3p : read_2dx;
+
+	if (suffix && *suffix != '0')
+		sprintf_s(filename_path, "%05d%c.%s", music_id, *suffix, sndtype == ENUM_TYPE_WMA ? "s3p" : "2dx");
+	else
+		sprintf_s(filename_path, "%05d.%s", music_id, sndtype == ENUM_TYPE_WMA ? "s3p" : "2dx");
+
+	if (PathFileExistsA(filename_path))
+	{
+		ret = 0;
+		_logm("%s: Opening file %s...", __func__, filename_path);
+		ret = func(filename_path, callback);
+	}
 
 	return ret;
 }

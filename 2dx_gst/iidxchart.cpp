@@ -8,6 +8,8 @@
 
 #include "misc.h"
 
+#define __MODULE__ "chart"
+
 #define SIZE_OUTPUT_BUF 150 * 1024 * 1024 // 150MB
 
 struct iidx_chart_index
@@ -67,7 +69,7 @@ static char iidx_chart_name[][8] =
 static int16_t keysounds[8 * 2]; // 8 lanes each side
 static int32_t bss_end_pos[2];
 
-int process_chart_file(int music_id, char *sndstr, int volume_level)
+int proc_chart(int music_id, char *sndstr, int volume_level)
 {
 	char path[260];
 	sprintf_s(path, 260, "%05d.1", music_id);
@@ -75,7 +77,7 @@ int process_chart_file(int music_id, char *sndstr, int volume_level)
 
 	SetTitle("2dx_gst");
 
-	printf("Opening chart file %s...\n", path);
+	_logi("%s: Opening chart file %s...", __func__, path);
 
 	std::fstream iidxchart;
 	iidxchart.open(path, std::ios::in | std::ios::binary);
@@ -123,14 +125,13 @@ int process_chart_file(int music_id, char *sndstr, int volume_level)
 		return 0;
 	});
 
-	printf("Create sound buffer pool...\n");
+	_logi("%s: Create sound buffer pool...", __func__);
 	snd_buf_init();
 
 	unsigned char *output_buf = new unsigned char[SIZE_OUTPUT_BUF];
 	if (!output_buf)
 	{
-		printf("Failed to allocate output buffer, exiting...\n");
-		exit(-1);
+		_logf("%s: Failed to allocate output buffer, exiting...", __func__);
 	}
 	unsigned char sha1_buf[12][20] = { 0 };
 	unsigned char is_checked[12] = { 0 };
@@ -148,17 +149,17 @@ int process_chart_file(int music_id, char *sndstr, int volume_level)
 		{
 			if (last_suffix != mixed_chart_snd[k].snd_suffix)
 			{
-				printf("Initialize sound buffer pool for %d:%c...\n", music_id, mixed_chart_snd[k].snd_suffix);
-				if (init_sound_buffer(music_id, &mixed_chart_snd[k].snd_suffix) == 0)
+				_logi("%s: Initialize sound buffer pool for %d:%c...", __func__, music_id, mixed_chart_snd[k].snd_suffix);
+				if (init_sound_buffer(music_id, &mixed_chart_snd[k].snd_suffix) < 0)
 				{
-					printf("Failed to init sound buffer pool, exiting...\n");
+					_logw("%s: Failed to init sound buffer pool, exiting...", __func__);
 					delete[]chartdata;
 					clear_sound_buffer();
 					snd_buf_revoke();
 					delete[]output_buf;
 					return -1;
 				}
-				printf("Sound buffer pool initialized.\n");
+				_logi("%s: Sound buffer pool initialized.", __func__);
 				last_suffix = mixed_chart_snd[k].snd_suffix;
 			}
 
@@ -248,7 +249,7 @@ int process_chart_file(int music_id, char *sndstr, int volume_level)
 					}
 					break;
 				case E_KEYPLAY:
-					/* mix keysound of id p_chart->val2 */
+					// printf("EVENT_PLAY: %d\n", p_chart->val1);
 					size_output_buf = mix_bgm(
 						output_buf,
 						size_output_buf,
@@ -258,7 +259,14 @@ int process_chart_file(int music_id, char *sndstr, int volume_level)
 						);
 					total_keysound++;
 					break;
+				case E_BPM_CHANGE:
+				case E_BEAT_CHANGE:
+				case E_TIMING_CHANGE:
+				case E_MEASURE:
+				case E_NOTE_COUNT:
+					break;
 				default:
+					_logw("%s: Unknown command %02x[%08d](%d, %d)", __func__, p_chart->command, p_chart->timecode, p_chart->val1, p_chart->val2);
 					break;
 				}
 
@@ -273,7 +281,7 @@ int process_chart_file(int music_id, char *sndstr, int volume_level)
 
 			int is_spawn_file = 1;
 
-			printf("\t%s_%s: %d\n", path, iidx_chart_name[i], total_keysound);
+			_logm("%s: %s_%s: %d", __func__, path, iidx_chart_name[i], total_keysound);
 
 			for (int j = 0; j < 12; j++)
 			{
@@ -281,7 +289,7 @@ int process_chart_file(int music_id, char *sndstr, int volume_level)
 				if (is_checked[j] && memcmp(sha1_buf[i], sha1_buf[j], 20) == 0)
 				{
 					is_spawn_file = 0;
-					printf("\tSame as file %s_%s\n", path, iidx_chart_name[j]);
+					_logw("%s: Same as file %s_%s, skipping...", __func__, path, iidx_chart_name[j]);
 					break;
 				}
 			}
@@ -301,10 +309,7 @@ int process_chart_file(int music_id, char *sndstr, int volume_level)
 					output.write((char*)output_buf, size_output_buf);
 					output.close();
 				}
-			}
-			else
-			{
-				printf("same output, skipping...\n");
+				_logi("%s: Wrote file '%s'(%d).", __func__, output_path, size_output_buf + sizeof(dummyheader));
 			}
 			is_checked[i] = 1;
 		}

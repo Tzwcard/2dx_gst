@@ -16,6 +16,9 @@
 
 #include "outdef.h"
 
+#include "misc.h"
+#define __MODULE__ "msadpcm"
+
 struct T_fmt_coeff
 {
 	int16_t sample_per_blk;
@@ -33,7 +36,7 @@ static DWORD decode_msadpcm(const uint8_t* wavedata, std::size_t totalsize, uint
 	ADPCMWAVEFORMAT *fmt = (ADPCMWAVEFORMAT *)wavedata;
 
 	auto dump_fmt = [](WAVEFORMATEX* in) {
-		printf("Format: 0x%08x, %d, %d, %d\n", in->wFormatTag, in->nChannels, in->nSamplesPerSec, in->wBitsPerSample);
+		_logm("%s: Format: 0x%08x, %d, %d, %d", __func__, in->wFormatTag, in->nChannels, in->nSamplesPerSec, in->wBitsPerSample);
 	};
 
 	PCMWAVEFORMAT decode_fmt;
@@ -240,7 +243,7 @@ static int decode_msadpcm(const uint8_t* blockData, std::size_t totalsize, ::siz
 static const char _data_string[] = "data", 
 _fmt_string[] = "fmt ",
 _fact_string[] = "fact";
-int msadpcm_to_waveform(unsigned char *adpcm_data, int size_adpcm_data, unsigned char *wave_data, uint8_t* ch)
+int msadpcm_to_waveform(unsigned char *adpcm_data, int size_adpcm_data, unsigned char *wave_data, unsigned char* ch)
 {
 	int wave_size = 0, pos = 0, fmt_pos = 0;
 

@@ -1,6 +1,9 @@
 #include "s3phelper.h"
 #include <fstream>
 
+#include "misc.h"
+#define __MODULE__ "s3p"
+
 struct s3p_header
 {
 	uint8_t s3pheader[4]; // 'S3P0'
@@ -39,7 +42,7 @@ int read_s3p(char *s3p_path, FARPROC wma_read_callback)
 	//  char logline[260];
 //	uint32_t *tmp_ptr;
 
-	printf("S3P: Total file count %d\n", p_header->count_file);
+	_logm("%s: Total file count %d\n", __func__, p_header->count_file);
 
 	if (wma_read_callback)
 		((int(*)(int id, void *buf, int size))wma_read_callback)(p_header->count_file, NULL, 0);

@@ -1,6 +1,9 @@
 #include "2dxhelper.h"
 #include <fstream>
 
+#include "misc.h"
+#define __MODULE__ "2dx"
+
 struct iidx_snd_header
 {
 	uint8_t comment[16];
@@ -46,7 +49,7 @@ int read_2dx(char *s3p_path, FARPROC iidxsnd_read_callback)
 	//  char logline[260];
 	//	uint32_t *tmp_ptr;
 
-	printf("2DX: Total file count %d\n", p_header->count_file);
+	_logm("%s: Total file count %d", __func__, p_header->count_file);
 
 	if (iidxsnd_read_callback)
 		((int(*)(int id, void *buf, int size))iidxsnd_read_callback)(p_header->count_file, NULL, 0);
